@@ -1,0 +1,1370 @@
+/* =========================================================
+   Whisper of Light — style.css
+   Pitch-black darkness + a flashlight mask that reveals a
+   bilingual (AR/EN) gift once the hidden Magic Star is found.
+   Palette: warm rose-gold on deep plum — cozy and soft,
+   never neon-harsh.
+   ========================================================= */
+
+/* Registered so the flashlight hole can smoothly grow open
+   when the light is switched on (falls back to a snap). */
+@property --beam {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 150px;
+}
+
+/* =========================================================
+   0. TOKENS + BASE
+   ========================================================= */
+:root{
+  --bg:#000;
+  --bg-2:#1a1c2e;
+  --ink:#f6ecf2;
+  --muted:#a392a6;
+
+  /* original concept palette (kept as reference) */
+  --gold:#ffd36a;
+  --gold-2:#ffb347;
+  --pink:#ff8fd2;
+  --cyan:#7ef0ff;
+  --violet:#b39cff;
+
+  /* warm rose-gold palette — the actual look */
+  --peach:#ffdab0;
+  --rose:#ffa7c4;
+  --champagne:#ffe9cd;
+  --warm:#ffd3a8;
+
+  /* flashlight — JS drives the position, CSS sets the size */
+  --beam:150px;
+  --mx:50%;
+  --my:50%;
+
+  --ease:cubic-bezier(.22,.61,.36,1);
+
+  --font-en:ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,-apple-system,
+            "Helvetica Neue",Arial,sans-serif;
+  --font-ar:"Noto Kufi Arabic","Noto Naskh Arabic","Segoe UI",Tahoma,system-ui,sans-serif;
+
+  /* calligraphic letters — web fonts w/ graceful system fallbacks */
+  --font-letter:"Amiri","Noto Naskh Arabic",Georgia,serif;
+  --font-sig:"Aref Ruqaa","Amiri","Noto Naskh Arabic","Geeza Pro",serif;
+}
+
+*{ box-sizing:border-box; }
+
+html,body{ height:100%; }
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--font-en);
+  overflow:hidden;
+  overscroll-behavior:none;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* Arabic typography gets its own stack + a little more breathing room */
+html[lang="ar"] body{ font-family:var(--font-ar); line-height:1.75; }
+
+button{ font:inherit; }
+
+/* =========================================================
+   1. STAGE  (the illuminated world, hidden under the darkness)
+   ========================================================= */
+.stage{
+  position:fixed;
+  inset:0;
+  z-index:10;
+}
+
+/* =========================================================
+   2. DARKNESS + FLASHLIGHT MASK
+   ========================================================= */
+.darkness{
+  position:fixed;
+  inset:0;
+  z-index:30;
+  pointer-events:none;
+  will-change:background, opacity;
+  background:
+    /* faint warm rim inside the beam */
+    radial-gradient(circle calc(var(--beam) * .5) at var(--mx) var(--my),
+      rgba(255,238,210,.05) 0%, rgba(255,238,210,0) 72%),
+    /* the mask: fully transparent hole → solid black */
+    radial-gradient(circle var(--beam) at var(--mx) var(--my),
+      rgba(0,0,0,0) 0 42%,
+      rgba(0,0,0,.35) 62%,
+      rgba(0,0,0,.85) 84%,
+      #000 100%);
+  transition:--beam .9s var(--ease), opacity .9s var(--ease);
+}
+
+/* the light being switched on: the hole floods the whole screen */
+.darkness.revealed{
+  opacity:0;
+}
+
+/* =========================================================
+   3. THE MAGIC STAR  (a tiny secret, invisible until found)
+   ========================================================= */
+.magic-star{
+  position:fixed;
+  left:var(--star-x, 68%);
+  top:var(--star-y, 34%);
+  width:clamp(22px, 5vw, 34px);
+  height:clamp(22px, 5vw, 34px);
+  margin:0;
+  padding:0;
+  border:0;
+  background:transparent;
+  z-index:5;
+  color:var(--peach);
+  cursor:pointer;
+  pointer-events:none;          /* no dragging / no clicking needed */
+  -webkit-tap-highlight-color:transparent;
+  opacity:.1;
+  transform:translate(-50%,-50%) scale(.92);
+  transition:opacity .35s var(--ease), transform .35s var(--ease),
+             filter .35s var(--ease);
+}
+
+/* soft halo around the little sparkle */
+.star-glow{
+  position:absolute;
+  inset:-140%;
+  border-radius:50%;
+  pointer-events:none;
+  background:radial-gradient(circle,
+    rgba(255,220,178,.5) 0%,
+    rgba(255,196,150,.2) 42%,
+    transparent 70%);
+  filter:blur(5px);
+  opacity:.5;
+  transition:opacity .35s var(--ease), transform .35s var(--ease);
+}
+
+.star-inner{
+  position:absolute;
+  inset:0;
+  display:block;
+  filter:drop-shadow(0 0 6px rgba(255,220,178,.85))
+         drop-shadow(0 0 16px rgba(255,196,150,.5));
+  animation:starBreathe 3.2s ease-in-out infinite;
+}
+.star-inner svg{
+  width:100%;
+  height:100%;
+  display:block;
+  fill:#ffe6c8;
+}
+@keyframes starBreathe{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.1); } }
+
+/* the spotlight has reached it — the little star flares to life */
+.magic-star.near{
+  opacity:1;
+  transform:translate(-50%,-50%) scale(1.35);
+  filter:drop-shadow(0 0 10px rgba(255,238,205,1))
+         drop-shadow(0 0 24px rgba(255,196,150,.75));
+}
+.magic-star.near .star-glow{ opacity:1; transform:scale(1.2); }
+
+/* the touch that switches the lights on */
+.magic-star.lit{
+  opacity:1;
+  animation:ignite .8s var(--ease) forwards;
+}
+.magic-star.lit .star-glow{ animation:glowBurst .8s var(--ease) forwards; }
+@keyframes ignite{
+  0%  { transform:translate(-50%,-50%) scale(1.35); }
+  35% { transform:translate(-50%,-50%) scale(1.85); }
+  100%{ transform:translate(-50%,-50%) scale(3.2); opacity:0; }
+}
+@keyframes glowBurst{
+  0%  { opacity:1; transform:scale(1.2); }
+  100%{ opacity:0; transform:scale(2.6); }
+}
+
+/* =========================================================
+   4. HUD  (hidden until the gift is lit)
+   ========================================================= */
+.hud{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:52;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:18px clamp(14px, 3vw, 32px);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .8s var(--ease) .25s, visibility .8s var(--ease) .25s;
+}
+body.revealed .hud{ opacity:1; visibility:visible; }
+.hud > *{ pointer-events:auto; }
+
+.hud-left{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  min-width:0;
+}
+
+/* subtle "← Back" pill */
+.back-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  height:42px;
+  padding:0 16px 0 13px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(26,20,34,.55);
+  color:rgba(255,238,222,.92);
+  font-size:13.5px;
+  font-weight:700;
+  letter-spacing:.05em;
+  cursor:pointer;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  box-shadow:0 10px 26px rgba(0,0,0,.4);
+  transition:transform .25s var(--ease), border-color .25s var(--ease),
+             background .25s var(--ease), color .25s var(--ease);
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+.back-btn:hover{
+  transform:translateY(-1px);
+  border-color:rgba(255,211,170,.55);
+  background:rgba(44,30,42,.78);
+  color:#fff;
+}
+.back-btn:active{ transform:scale(.96); }
+.back-btn:focus-visible{
+  outline:2px solid rgba(255,211,168,.8);
+  outline-offset:3px;
+}
+.back-ic{
+  font-size:16px;
+  line-height:1;
+  transform:translateY(-1px);
+}
+/* in RTL the arrow flips so it still points "back" */
+[dir="rtl"] .back-ic{ transform:scaleX(-1) translateY(-1px); }
+
+.brand{ display:flex; align-items:center; gap:10px; }
+.brand-mark{
+  color:#ffd9b4;
+  font-size:18px;
+  text-shadow:0 0 14px rgba(255,214,170,.75);
+  animation:brandTwinkle 3.4s ease-in-out infinite;
+}
+@keyframes brandTwinkle{
+  0%,100%{ opacity:.7; transform:scale(1); }
+  50%    { opacity:1;  transform:scale(1.18); }
+}
+.brand-name{
+  font-size:clamp(13px, 1.4vw, 15px);
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--muted);
+  font-weight:600;
+}
+
+.hud-controls{ display:flex; align-items:center; gap:10px; }
+
+.lang-btn,
+.sound-btn{
+  height:46px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(26,20,34,.6);
+  color:var(--ink);
+  cursor:pointer;
+  display:grid;
+  place-items:center;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  box-shadow:0 10px 30px rgba(0,0,0,.45);
+  transition:transform .25s var(--ease), border-color .25s var(--ease),
+             background .25s var(--ease);
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+.lang-btn{ min-width:52px; padding:0 16px; font-size:15px; font-weight:700; }
+.sound-btn{ width:46px; font-size:18px; }
+.lang-btn:hover, .sound-btn:hover{
+  transform:scale(1.06);
+  border-color:rgba(255,211,170,.55);
+  background:rgba(46,30,44,.85);
+}
+.lang-btn:focus-visible, .sound-btn:focus-visible{
+  outline:2px solid rgba(255,211,168,.8);
+  outline-offset:3px;
+}
+
+/* =========================================================
+   4b. FLOATING MUSIC PLAYER  (glass pill, top-right)
+   ========================================================= */
+.music-widget{
+  position:fixed;
+  top:calc(env(safe-area-inset-top, 0px) + 82px);
+  right:clamp(12px, 2vw, 28px);
+  z-index:53;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  max-width:calc(100vw - 24px);
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(24,16,32,.55);
+  border:1px solid rgba(255,255,255,.1);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  box-shadow:0 12px 34px rgba(0,0,0,.45), 0 0 26px rgba(255,170,200,.16);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .8s var(--ease) .25s, visibility .8s var(--ease) .25s;
+}
+body.revealed .music-widget{ opacity:1; visibility:visible; }
+.music-widget > *{ pointer-events:auto; }
+
+.mw-btn{
+  width:32px;
+  height:32px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(38,26,44,.7);
+  color:#ffe9dc;
+  font-size:14px;
+  line-height:1;
+  cursor:pointer;
+  display:grid;
+  place-items:center;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  box-shadow:0 6px 18px rgba(0,0,0,.35);
+  transition:transform .25s var(--ease), border-color .25s var(--ease),
+             background .25s var(--ease), box-shadow .25s var(--ease);
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+.mw-btn:hover{
+  transform:scale(1.08);
+  border-color:rgba(255,180,208,.55);
+  background:rgba(52,34,56,.9);
+}
+.mw-btn:active{ transform:scale(.94); }
+.mw-btn:focus-visible{ outline:2px solid rgba(255,211,168,.8); outline-offset:2px; }
+.mw-play{
+  width:38px;
+  height:38px;
+  border:0;
+  color:#4a2a14;
+  background:linear-gradient(100deg, #ffe1bb 0%, #ffc9a0 45%, #ffa7c4 120%);
+  box-shadow:0 8px 22px rgba(255,168,130,.35), inset 0 1px 0 rgba(255,255,255,.6);
+}
+.mw-play:hover{
+  border:0;
+  box-shadow:0 10px 26px rgba(255,168,130,.45);
+}
+
+.mw-meta{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+.mw-title{
+  font-size:12.5px;
+  font-weight:700;
+  letter-spacing:.04em;
+  color:#ffd9b4;
+  max-width:120px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+/* tiny 3-bar visualizer — pulses only while playing */
+.mw-viz{
+  display:flex;
+  align-items:flex-end;
+  gap:3px;
+  height:16px;
+}
+.mw-viz i{
+  width:3px;
+  height:100%;
+  border-radius:2px;
+  background:linear-gradient(to top, #ffd9b4, #ffa7c4);
+  transform:scaleY(.32);
+  transform-origin:bottom;
+}
+.music-widget.playing .mw-viz i{ animation:mwBounce 1s ease-in-out infinite; }
+.mw-viz i:nth-child(2){ animation-delay:.18s; }
+.mw-viz i:nth-child(3){ animation-delay:.36s; }
+@keyframes mwBounce{
+  0%,100%{ transform:scaleY(.32); }
+  50%    { transform:scaleY(1); }
+}
+
+/* mirror to the top-left corner in RTL (under the mirrored HUD controls) */
+[dir="rtl"] .music-widget{
+  right:auto;
+  left:clamp(12px, 2vw, 28px);
+}
+
+/* =========================================================
+   5. GIFT AREA
+   ========================================================= */
+.gift{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  background:#0c0910; /* ultimate fallback */
+}
+
+/* the artwork itself — brightened so it reads through the dark mood */
+.gift-bg{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:
+    radial-gradient(100% 80% at 50% 0%, #261a26 0%, #191220 52%, #0c0910 100%),
+    url("Background.png") center / cover no-repeat;
+  filter:brightness(2.15) saturate(1.05) contrast(1.05);
+}
+
+/* soft vignette that keeps the lit world dim & cozy */
+.gift::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 1.6s ease .4s;
+  background:radial-gradient(120% 120% at 50% 38%,
+    transparent 58%, rgba(6,4,10,.4) 100%);
+}
+body.revealed .gift::after{ opacity:1; }
+
+/* --- ambient bokeh (blooms softly on reveal) --- */
+.bokeh{ position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+.bokeh span{
+  position:absolute;
+  border-radius:50%;
+  filter:blur(34px);
+  opacity:0;
+  transition:opacity 1.4s var(--ease) .15s;
+}
+body.revealed .bokeh span{ opacity:.32; }
+.bokeh span:nth-child(1){
+  width:240px; height:240px; left:6%; top:8%;
+  background:radial-gradient(circle, rgba(255,200,155,.55), transparent 70%);
+  animation:drift1 22s ease-in-out infinite;
+}
+.bokeh span:nth-child(2){
+  width:200px; height:200px; right:4%; top:16%;
+  background:radial-gradient(circle, rgba(255,176,206,.5), transparent 70%);
+  animation:drift2 26s ease-in-out infinite;
+}
+.bokeh span:nth-child(3){
+  width:280px; height:280px; left:12%; bottom:2%;
+  background:radial-gradient(circle, rgba(196,168,214,.5), transparent 70%);
+  animation:drift1 30s ease-in-out infinite reverse;
+}
+.bokeh span:nth-child(4){
+  width:180px; height:180px; right:12%; bottom:6%;
+  background:radial-gradient(circle, rgba(255,205,168,.42), transparent 70%);
+  animation:drift2 24s ease-in-out infinite reverse;
+}
+.bokeh span:nth-child(5){
+  width:150px; height:150px; left:44%; top:40%;
+  background:radial-gradient(circle, rgba(255,216,170,.42), transparent 70%);
+  animation:drift1 18s ease-in-out infinite;
+}
+@keyframes drift1{
+  0%,100%{ transform:translate(0,0) scale(1); }
+  50%    { transform:translate(40px,-30px) scale(1.12); }
+}
+@keyframes drift2{
+  0%,100%{ transform:translate(0,0) scale(1); }
+  50%    { transform:translate(-36px,26px) scale(1.08); }
+}
+
+/* --- multi-view page flow --- */
+.view{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  display:grid;
+  place-items:center;
+  overflow:auto;
+  padding:clamp(16px, 4vw, 40px);
+  opacity:0;
+  visibility:hidden;
+  transform:translateX(56px);
+  pointer-events:none;
+  transition:opacity .6s var(--ease), transform .6s var(--ease), visibility .6s var(--ease);
+}
+.view.active{
+  opacity:1;
+  visibility:visible;
+  transform:none;
+  pointer-events:auto;
+}
+.view.leave{
+  opacity:0;
+  transform:translateX(-56px);
+  visibility:hidden;
+  pointer-events:none;
+}
+
+/* --- card --- */
+.gift-card{
+  position:relative;
+  width:min(560px, 100%);
+  padding:clamp(30px, 5vw, 48px);
+  border-radius:38px;
+  text-align:center;
+  background:linear-gradient(160deg, rgba(56,38,54,.94), rgba(25,18,30,.97));
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.55),
+    0 0 60px rgba(255,184,140,.1),
+    0 0 0 1px rgba(255,255,255,.03) inset;
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  animation:floatCard 7s ease-in-out infinite;
+}
+@keyframes floatCard{
+  0%,100%{ transform:translateY(0); }
+  50%    { transform:translateY(-7px); }
+}
+
+/* rotating warm glow border */
+.gift-card::before{
+  content:"";
+  position:absolute;
+  inset:-1.5px;
+  border-radius:39px;
+  padding:1px;
+  background:conic-gradient(from 0deg, transparent 0 55%,
+    rgba(255,220,178,.85) 70%, rgba(255,176,208,.8) 84%, transparent 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  animation:spin 7s linear infinite;
+  pointer-events:none;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+
+/* the cat */
+.cat-gif{
+  display:block;
+  margin:0 auto clamp(16px, 3vw, 22px);
+  width:auto;
+  max-width:min(280px, 68%);
+  max-height:34vh;
+  border-radius:26px;
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 14px 40px rgba(0,0,0,.45), 0 0 40px rgba(255,190,145,.14);
+  object-fit:cover;
+  animation:catSway 6s ease-in-out infinite;
+}
+@keyframes catSway{
+  0%,100%{ transform:translateY(0) rotate(0); }
+  50%    { transform:translateY(-4px) rotate(-1.2deg); }
+}
+
+/* =========================================================
+   6. QUESTION + FEEDBACK
+   ========================================================= */
+.feedback-question{
+  margin:0 0 22px;
+  font-size:clamp(20px, 3.8vw, 26px);
+  font-weight:800;
+  letter-spacing:0;
+  color:#f9eff6;
+}
+
+.feedback-actions{
+  display:flex;
+  gap:16px;
+  justify-content:center;
+  flex-wrap:wrap;
+  transition:opacity .35s var(--ease), transform .35s var(--ease);
+}
+
+.btn-yes,
+.btn-no{
+  cursor:pointer;
+  border-radius:999px;
+  padding:14px 30px;
+  font-weight:700;
+  font-size:16px;
+  line-height:1;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  transition:transform .25s var(--ease), box-shadow .25s var(--ease),
+             background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease);
+}
+.btn-yes{
+  border:0;
+  color:#4a2a14;
+  background:linear-gradient(100deg, #ffe1bb 0%, #ffc9a0 45%, #ffa7c4 120%);
+  box-shadow:0 12px 30px rgba(255,168,130,.28), inset 0 1px 0 rgba(255,255,255,.6);
+}
+.btn-yes:hover{
+  transform:translateY(-2px) scale(1.04);
+  box-shadow:0 16px 40px rgba(255,168,130,.38), inset 0 1px 0 rgba(255,255,255,.7);
+}
+.btn-yes:active{ transform:scale(.97); }
+.btn-yes:focus-visible{ outline:2px solid rgba(255,211,168,.8); outline-offset:4px; }
+
+.btn-no{
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.05);
+  color:#e6d3e0;
+}
+.btn-no:hover{
+  background:rgba(255,176,208,.14);
+  border-color:rgba(255,176,208,.55);
+  color:#fff;
+}
+.btn-no:focus-visible{ outline:2px solid rgba(255,211,168,.8); outline-offset:4px; }
+
+/* the runaway state */
+.btn-no.roaming{
+  position:fixed;
+  left:0;
+  top:0;
+  margin:0;
+  z-index:70;
+  will-change:transform;
+  transition:transform .38s cubic-bezier(.22,.61,.36,1);
+  box-shadow:0 14px 34px rgba(0,0,0,.45), 0 0 20px rgba(255,176,208,.22);
+}
+.btn-no.dodge{ animation:dodgePop .42s var(--ease); }
+@keyframes dodgePop{
+  0%  { rotate:0deg; }
+  35% { rotate:-9deg; }
+  65% { rotate:7deg; }
+  100%{ rotate:0deg; }
+}
+
+/* =========================================================
+   6b. PAGE 2 — GIFT HUB + FLOWER GAME
+   ========================================================= */
+.p2-wrap{
+  width:min(920px, 100%);
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:minmax(0, 1fr);
+  align-items:center;
+}
+
+/* shared slide for hub ↔ game panels inside Page 2.
+   Every pane shares one grid cell so only the active pane is laid out
+   visually centred — inactive panes never push it off-screen. */
+.p2-pane{
+  grid-column:1;
+  grid-row:1;
+  width:100%;
+  opacity:0;
+  visibility:hidden;
+  transform:translateY(26px);
+  pointer-events:none;
+  transition:opacity .45s var(--ease), transform .45s var(--ease),
+             visibility .45s var(--ease);
+}
+.p2-pane.active{
+  opacity:1;
+  visibility:visible;
+  transform:none;
+  pointer-events:auto;
+  transition-delay:.08s;
+}
+
+/* --- hub header + grid --- */
+.hub-head{ text-align:center; padding-bottom:6px; }
+.hub-title{
+  margin:0;
+  font-size:clamp(22px, 4vw, 32px);
+  font-weight:800;
+  letter-spacing:.01em;
+  color:#f9eff6;
+  text-shadow:0 2px 16px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.55);
+}
+.hub-sub{
+  margin:8px 0 0;
+  font-size:clamp(13px, 2.4vw, 15px);
+  color:var(--muted);
+  text-shadow:0 1px 10px rgba(0,0,0,.6);
+}
+.hub-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+  gap:16px;
+}
+
+.game-card{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:172px;
+  padding:24px 16px 20px;
+  border-radius:28px;
+  text-align:center;
+  cursor:pointer;
+  color:inherit;
+  background:linear-gradient(165deg, rgba(58,40,58,.88), rgba(24,16,30,.94));
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 18px 44px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.03);
+  transition:transform .3s var(--ease), border-color .3s var(--ease),
+             box-shadow .3s var(--ease), background .3s var(--ease);
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  overflow:hidden;
+}
+.game-card::after{
+  content:"";
+  position:absolute;
+  inset:0 0 auto 0;
+  height:55%;
+  background:linear-gradient(180deg, rgba(255,255,255,.05), transparent);
+  pointer-events:none;
+}
+.game-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(255,211,170,.5);
+  box-shadow:0 22px 52px rgba(0,0,0,.5), 0 0 30px rgba(255,180,140,.12);
+}
+.game-card:active{ transform:translateY(-1px) scale(.98); }
+.game-card:focus-visible{
+  outline:2px solid rgba(255,211,168,.85);
+  outline-offset:3px;
+}
+.gc-ico{
+  font-size:clamp(34px, 6vw, 46px);
+  line-height:1;
+  filter:drop-shadow(0 4px 10px rgba(255,190,150,.35));
+  animation:gcBob 3.6s ease-in-out infinite;
+}
+.gc-name{
+  font-weight:800;
+  font-size:clamp(15px, 3vw, 17px);
+  color:#f9eff6;
+}
+.gc-line{ font-size:12.5px; color:var(--muted); }
+@keyframes gcBob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-4px); } }
+
+.game-card.soon{
+  cursor:default;
+  opacity:.72;
+  filter:saturate(.85);
+  border-style:dashed;
+  border-color:rgba(255,255,255,.12);
+}
+.game-card.soon .gc-ico{ animation:none; opacity:.85; }
+
+/* --- full-screen game panel (flower drawing) --- */
+.game-panel{ position:relative; }
+.game-panel.active{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  display:block;
+}
+
+/* floating glass title chip (below the HUD) */
+.gp-title{
+  position:absolute;
+  top:calc(env(safe-area-inset-top, 0px) + 78px);
+  left:0;
+  right:0;
+  width:max-content;
+  max-width:calc(100vw - 24px);
+  margin:0 auto;
+  z-index:6;
+  padding:9px 18px;
+  border-radius:999px;
+  font-size:clamp(15px, 2.6vw, 18px);
+  font-weight:800;
+  letter-spacing:.02em;
+  color:#fdf4f9;
+  text-shadow:0 1px 8px rgba(0,0,0,.5);
+  background:rgba(24,16,32,.5);
+  border:1px solid rgba(255,255,255,.1);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  box-shadow:0 10px 28px rgba(0,0,0,.35);
+  transition:opacity .6s var(--ease), translate .6s var(--ease);
+}
+
+/* the artwork surface: full viewport, no chrome */
+.draw-canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:block;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  touch-action:none;
+  cursor:crosshair;
+}
+
+/* current flower style — floats just above the dock */
+.style-name{
+  position:absolute;
+  bottom:calc(env(safe-area-inset-bottom, 0px) + 88px);
+  left:0;
+  right:0;
+  width:max-content;
+  max-width:calc(100vw - 24px);
+  margin:0 auto;
+  z-index:6;
+  padding:6px 14px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.05em;
+  text-align:center;
+  color:#ffd9b4;
+  background:rgba(24,16,32,.42);
+  border:1px solid rgba(255,255,255,.09);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  transition:opacity .6s var(--ease), translate .6s var(--ease);
+}
+.style-name.pop{ animation:stylePop .5s var(--ease); }
+@keyframes stylePop{
+  0%  { opacity:.3; transform:scale(.92); }
+  60% { opacity:1; transform:scale(1.06); }
+  100%{ opacity:.9; transform:scale(1); }
+}
+
+/* bottom glass dock — centered without relying on transforms */
+.gp-controls{
+  position:absolute;
+  bottom:calc(env(safe-area-inset-bottom, 0px) + 14px);
+  left:0;
+  right:0;
+  width:max-content;
+  max-width:calc(100vw - 20px);
+  margin:0 auto;
+  z-index:6;
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  flex-wrap:wrap;
+  padding:10px;
+  border-radius:26px;
+  background:rgba(20,14,28,.55);
+  border:1px solid rgba(255,255,255,.1);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  box-shadow:0 16px 40px rgba(0,0,0,.5);
+  transition:opacity .6s var(--ease), translate .6s var(--ease);
+}
+
+/* unobtrusive: fade + nudge the chrome away while drawing */
+.game-panel.idle .gp-controls,
+.game-panel.idle .gp-title,
+.game-panel.idle .style-name{
+  opacity:.35;
+}
+.game-panel.idle .gp-controls{ translate:0 10px; }
+.game-panel.idle .gp-title{ translate:0 -8px; }
+
+.gp-btn{
+  height:44px;
+  padding:0 16px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(26,20,34,.6);
+  color:var(--ink);
+  font-weight:700;
+  font-size:13.5px;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  white-space:nowrap;
+  transition:transform .25s var(--ease), border-color .25s var(--ease),
+             background .25s var(--ease), box-shadow .25s var(--ease);
+}
+.gp-btn:hover{
+  transform:translateY(-2px);
+  border-color:rgba(255,211,170,.55);
+  background:rgba(44,30,42,.8);
+}
+.gp-btn:active{ transform:scale(.97); }
+.gp-btn:focus-visible{ outline:2px solid rgba(255,211,168,.8); outline-offset:3px; }
+.gp-btn.primary{
+  border:0;
+  color:#4a2a14;
+  background:linear-gradient(100deg, #ffe1bb 0%, #ffc9a0 45%, #ffa7c4 120%);
+  box-shadow:0 12px 28px rgba(255,168,130,.3), inset 0 1px 0 rgba(255,255,255,.6);
+}
+.gp-btn.primary:hover{ box-shadow:0 16px 36px rgba(255,168,130,.4); }
+
+/* =========================================================
+   6c. GIFT #2 — SPECIAL LETTERS  (Fai + Moaid)
+   ========================================================= */
+.gl-pane{
+  width:100%;
+  max-width:680px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+/* envelope-style sender tabs */
+.gl-tabs{ display:flex; justify-content:center; gap:10px; }
+.gl-tab{
+  flex:1;
+  max-width:260px;
+  height:46px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(26,20,34,.6);
+  color:var(--muted);
+  font-size:14.5px;
+  font-weight:700;
+  letter-spacing:.02em;
+  cursor:pointer;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  box-shadow:0 10px 26px rgba(0,0,0,.4);
+  transition:transform .25s var(--ease), border-color .25s var(--ease),
+             background .25s var(--ease), color .25s var(--ease);
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+.gl-tab:hover{
+  transform:translateY(-1px);
+  border-color:rgba(255,211,170,.5);
+  color:#ffe9dc;
+}
+.gl-tab.active{
+  color:#4a2a14;
+  border:0;
+  background:linear-gradient(100deg, #ffe1bb 0%, #ffc9a0 45%, #ffa7c4 120%);
+  box-shadow:0 12px 30px rgba(255,168,130,.32), inset 0 1px 0 rgba(255,255,255,.6);
+}
+.gl-tab:focus-visible{ outline:2px solid rgba(255,211,168,.8); outline-offset:3px; }
+
+/* letters share one grid cell, so the card keeps a steady height */
+.gl-cards{ display:grid; }
+.gl-letter{
+  grid-area:1 / 1;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  padding:clamp(22px, 5vw, 40px);
+  border-radius:28px;
+  background:rgba(28,20,34,.72);
+  border:1px solid rgba(255,255,255,.1);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  box-shadow:0 24px 60px rgba(0,0,0,.5), 0 0 40px rgba(255,180,140,.08);
+  opacity:0;
+  visibility:hidden;
+  transform:translateX(28px);
+  pointer-events:none;
+  transition:opacity .45s var(--ease), transform .45s var(--ease),
+             visibility .45s var(--ease);
+}
+.gl-letter.active{
+  opacity:1;
+  visibility:visible;
+  transform:none;
+  pointer-events:auto;
+}
+[dir="rtl"] .gl-letter{ transform:translateX(-28px); }
+[dir="rtl"] .gl-letter.active{ transform:none; }
+
+/* thin decorative gradient seam atop each letter */
+.gl-letter::before{
+  content:"";
+  display:block;
+  height:3px;
+  border-radius:999px;
+  margin-bottom:6px;
+  background:linear-gradient(90deg, transparent, rgba(255,199,150,.55), rgba(255,150,190,.45), transparent);
+}
+
+.gl-text{
+  margin:0;
+  font-family:var(--font-letter);
+  font-size:clamp(15px, 2.4vw, 17.5px);
+  line-height:1.95;
+  color:rgba(255,240,228,.94);
+  text-shadow:0 1px 10px rgba(0,0,0,.45);
+}
+.gl-text:last-of-type{ margin-bottom:4px; }
+
+/* signature area — calligraphic, glowing, pinned to the card's base */
+.gl-sig{
+  margin-top:auto;
+  padding-top:14px;
+  border-top:1px dashed rgba(255,255,255,.14);
+  font-family:var(--font-sig);
+  font-size:clamp(20px, 4.2vw, 28px);
+  line-height:1.5;
+  text-align:center;
+  letter-spacing:.02em;
+}
+.sig-fai{
+  color:#ffb9d6;
+  text-shadow:0 0 18px rgba(255,150,195,.6), 0 2px 10px rgba(0,0,0,.4);
+}
+.sig-moaid{
+  color:#ffd9a4;
+  text-shadow:0 0 18px rgba(255,190,110,.55), 0 2px 10px rgba(0,0,0,.4);
+}
+
+.gl-controls{ display:flex; justify-content:center; padding-top:4px; }
+
+/* =========================================================
+   6d. GIFT #3 — THE ENCHANTED ROSE  (glass dome)
+   ========================================================= */
+.gr-pane{
+  width:100%;
+  max-width:680px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.gr-stage{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+
+/* --- floating GIF stickers (inside the dedication card) --- */
+.gr-stickers{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:clamp(10px, 2vw, 16px);
+  margin:14px 0 6px;
+}
+.gr-sticker{
+  width:clamp(76px, 20vw, 112px);
+  height:auto;
+  border-radius:22px;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.06);
+  box-shadow:0 14px 34px rgba(0,0,0,.45), 0 0 26px rgba(255,170,200,.18);
+  animation:grFloatA 5.5s ease-in-out infinite;
+}
+.gr-sticker.tilt{
+  animation-name:grFloatB;
+  animation-duration:6.2s;
+}
+@keyframes grFloatA{
+  0%,100%{ transform:translateY(0) rotate(-3deg); }
+  50%    { transform:translateY(-7px) rotate(-0.5deg); }
+}
+@keyframes grFloatB{
+  0%,100%{ transform:translateY(0) rotate(3.5deg); }
+  50%    { transform:translateY(-6px) rotate(1deg); }
+}
+
+/* --- the dome (a big cozy button) --- */
+.gr-dome{
+  position:relative;
+  flex:0 0 auto;
+  width:clamp(210px, 46vw, 300px);
+  height:clamp(210px, 46vw, 300px);
+  padding:0;
+  border:0;
+  background:transparent;
+  font:inherit;
+  color:inherit;
+  border-radius:50%;
+  cursor:pointer;
+  outline-offset:8px;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+.gr-dome:focus-visible{ outline:2px solid rgba(255,211,168,.85); }
+
+/* cozy base the dome sits on */
+.gr-base{
+  position:absolute;
+  left:50%; bottom:6%;
+  width:78%; height:16%;
+  transform:translateX(-50%);
+  border-radius:50% / 42%;
+  background:linear-gradient(180deg, #6b4a3a 0%, #4a3026 55%, #33201a 100%);
+  box-shadow:0 18px 34px rgba(0,0,0,.55), inset 0 2px 0 rgba(255,220,190,.25);
+  z-index:3;
+}
+.gr-base::after{
+  content:"";
+  position:absolute; left:8%; right:8%; top:10%; height:26%;
+  border-radius:50%;
+  background:radial-gradient(ellipse at 50% 0, rgba(255,214,170,.55), transparent 72%);
+}
+
+/* the glass lid — soft border + diagonal reflection */
+.gr-glass{
+  position:absolute;
+  left:50%; bottom:14%;
+  width:76%; height:76%;
+  transform:translateX(-50%);
+  transform-origin:50% 100%;
+  border-radius:50% 50% 18% 18% / 62% 62% 12% 12%;
+  background:linear-gradient(160deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.05) 38%, rgba(180,200,255,.05) 100%);
+  border:1px solid rgba(255,255,255,.28);
+  backdrop-filter:blur(3px) saturate(1.1);
+  -webkit-backdrop-filter:blur(3px) saturate(1.1);
+  box-shadow:inset 0 6px 24px rgba(255,255,255,.14),
+             inset 0 -10px 30px rgba(120,90,140,.18),
+             0 10px 30px rgba(0,0,0,.35);
+  z-index:4;
+  transition:transform .7s var(--ease), opacity .7s var(--ease);
+}
+.gr-glass::after{
+  content:"";
+  position:absolute; left:14%; top:10%;
+  width:34%; height:56%;
+  border-radius:50% 50% 40% 40%;
+  background:linear-gradient(150deg, rgba(255,255,255,.55), rgba(255,255,255,0) 72%);
+  filter:blur(1px);
+  opacity:.7;
+  pointer-events:none;
+}
+.gr-dome.open .gr-glass{
+  transform:translate(-50%, -46%) scale(.94) rotate(-3deg);
+  opacity:.18;
+}
+
+/* the glowing rose inside */
+.gr-rose{
+  position:absolute;
+  left:50%; bottom:16%;
+  width:62%; height:88%;
+  transform:translateX(-50%) scale(.92);
+  transform-origin:50% 100%;
+  z-index:2;
+  transition:transform .7s var(--ease), filter .7s var(--ease);
+  filter:drop-shadow(0 0 10px rgba(255,140,180,.45));
+}
+.gr-rose svg{ display:block; width:100%; height:100%; overflow:visible; }
+.gr-dome.open .gr-rose{
+  transform:translateX(-50%) scale(1.06);
+  filter:drop-shadow(0 0 26px rgba(255,120,175,.85)) drop-shadow(0 0 46px rgba(255,190,120,.5));
+}
+
+/* one-shot expanding pulse when it blooms */
+.gr-ring{
+  position:absolute;
+  left:50%; bottom:14%;
+  width:42%; height:42%;
+  transform:translate(-50%, 0) scale(.4);
+  border-radius:50%;
+  border:2px solid rgba(255,180,140,.7);
+  opacity:0;
+  z-index:1;
+  pointer-events:none;
+}
+.gr-dome.open .gr-ring{ animation:grRing .9s var(--ease) forwards; }
+@keyframes grRing{
+  0%  { opacity:.75; transform:translate(-50%,0) scale(.4); }
+  100%{ opacity:0;   transform:translate(-50%,0) scale(1.9); }
+}
+
+/* "tap" hint */
+.gr-hint{
+  position:absolute;
+  left:50%; bottom:0;
+  transform:translateX(-50%);
+  font-size:12.5px;
+  letter-spacing:.06em;
+  color:var(--muted);
+  white-space:nowrap;
+  z-index:5;
+  transition:opacity .4s var(--ease);
+}
+.gr-dome.open .gr-hint{ opacity:0; }
+
+/* the dedication card — floats in above the rose, collapsing to nothing
+   while sealed so the dome stays perfectly centred */
+.gr-msg{
+  order:-1;
+  width:min(520px, 100%);
+  max-height:0;
+  overflow:hidden;
+  text-align:center;
+  padding:0 clamp(20px, 3.5vw, 30px);
+  border:1px solid transparent;
+  border-radius:24px;
+  background:rgba(28,20,34,.72);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  box-shadow:0 24px 60px rgba(0,0,0,.5), 0 0 40px rgba(255,160,180,.1);
+  opacity:0;
+  transform:translateY(14px);
+  pointer-events:none;
+  transition:max-height .55s var(--ease), opacity .45s var(--ease),
+             transform .55s var(--ease), padding .45s var(--ease),
+             border-color .45s var(--ease), margin-bottom .55s var(--ease);
+}
+.gr-msg.show{
+  max-height:640px;
+  opacity:1;
+  transform:none;
+  pointer-events:auto;
+  padding:clamp(20px, 3.5vw, 30px);
+  border-color:rgba(255,255,255,.1);
+  margin-bottom:clamp(14px, 3vw, 22px);
+}
+.gr-text{
+  margin:0 0 12px;
+  font-family:var(--font-letter);
+  font-size:clamp(15px, 2.4vw, 17px);
+  line-height:1.9;
+  color:rgba(255,240,228,.94);
+  text-shadow:0 1px 10px rgba(0,0,0,.45);
+}
+.gr-sig{
+  margin-top:10px;
+  padding-top:12px;
+  border-top:1px dashed rgba(255,255,255,.14);
+  font-family:var(--font-sig);
+  font-size:clamp(20px, 4vw, 26px);
+  text-align:end;
+  color:#ffc2d6;
+  text-shadow:0 0 18px rgba(255,140,185,.6), 0 2px 10px rgba(0,0,0,.4);
+}
+
+/* =========================================================
+   6e. GIFT #4 — CONSTELLATION OF WISHES  (interactive sky)
+   ========================================================= */
+.sky-pane{ position:static; transform:none; }
+
+/* the night-sky surface fills the pane */
+.sky-canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:block;
+  border:0;
+  border-radius:0;
+  touch-action:none;
+  cursor:crosshair;
+}
+
+/* screen-reader-only live region */
+.sr-only{
+  position:absolute;
+  width:1px; height:1px;
+  padding:0; margin:-1px;
+  overflow:hidden;
+  clip:rect(0 0 0 0);
+  white-space:nowrap;
+  border:0;
+}
+
+/* =========================================================
+   7. FX (canvas + light-switch burst)
+   ========================================================= */
+.fx{
+  position:fixed;
+  inset:0;
+  z-index:60;
+  pointer-events:none;
+}
+
+.flash{
+  position:fixed;
+  inset:0;
+  z-index:55;
+  pointer-events:none;
+  opacity:0;
+  mix-blend-mode:screen;
+  background:radial-gradient(circle at var(--fx,50%) var(--fy,50%),
+    #fff6e6 0%,
+    rgba(255,238,200,.8) 16%,
+    rgba(255,214,160,.28) 40%,
+    transparent 66%);
+}
+.flash.go{ animation:flashBurst 1.2s var(--ease); }
+@keyframes flashBurst{
+  0%  { opacity:0; }
+  10% { opacity:1; }
+  100%{ opacity:0; }
+}
+
+/* =========================================================
+   8. RESPONSIVE + MOTION PREFERENCES
+   ========================================================= */
+@media (max-width:640px){
+  :root{ --beam:110px; }
+  .brand-name{ display:none; }
+  .back-btn{ padding:0 12px; }
+  .back-tx{ display:none; }
+  .cat-gif{ max-height:30vh; }
+  .hub-grid{ grid-template-columns:repeat(auto-fit, minmax(132px, 1fr)); gap:12px; }
+  .gp-controls{ gap:10px; }
+  /* compact music widget */
+  .music-widget{ top:calc(env(safe-area-inset-top, 0px) + 76px); right:10px; padding:7px 9px; gap:6px; }
+  [dir="rtl"] .music-widget{ right:auto; left:10px; }
+  .mw-title{ max-width:84px; }
+  /* compact letters */
+  .gl-pane{ gap:12px; }
+  .gl-letter{ padding:20px 18px; border-radius:22px; }
+  .gl-tab{ max-width:220px; height:42px; }
+}
+
+/* slide the flower-game title out from under the music widget on short screens */
+@media (max-width:760px){
+  .gp-title{ left:12px; right:auto; width:max-content; margin:0; }
+  [dir="rtl"] .gp-title{ left:auto; right:12px; }
+}
+
+@media (max-width:400px){
+  .lang-btn{ min-width:46px; padding:0 12px; }
+  .hud-left{ gap:10px; }
+  .music-widget{ top:calc(env(safe-area-inset-top, 0px) + 74px); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *,
+  *::before,
+  *::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+  }
+  .bokeh span{ animation:none; }
+}

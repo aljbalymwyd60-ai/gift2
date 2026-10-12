@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#000000" />
+<title>Whisper of Light — A Little Gift For You</title>
+<meta name="description" content="Move your light through the darkness, find the glowing star, and let the gift appear." />
+<link rel="stylesheet" href="style.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ===================== STAGE (the real gift, hidden in the dark) ===================== -->
+  <div class="stage" id="stage">
+
+    <!-- illuminated content -->
+    <main class="gift" id="gift" aria-hidden="true" inert>
+
+      <!-- background artwork — brightened, behind everything -->
+      <div class="gift-bg" id="giftBg" aria-hidden="true"></div>
+
+      <!-- ambient warm bokeh (blooms when the lights come on) -->
+      <div class="bokeh" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+
+      <!-- ---------- Page 1: the question ---------- -->
+      <article class="view active" id="viewFeedback" aria-hidden="false">
+        <div class="gift-card">
+          <!-- ============================================================
+               EDIT ME  ↓  —  the little cat + question
+               ============================================================ -->
+          <img class="cat-gif" src="Cat.gif" alt="A cute cat" data-i18n-alt="catAlt" />
+
+          <p class="feedback-question" data-i18n="question">You like it dot you</p>
+
+          <div class="feedback-actions" id="feedbackActions">
+            <button class="btn-yes" id="yesBtn" type="button" data-i18n="yes">Yes! &#128150;</button>
+            <button class="btn-no" id="noBtn" type="button" data-i18n="no">No</button>
+          </div>
+          <!-- ============================================================
+               EDIT ME  ↑
+               ============================================================ -->
+        </div>
+      </article>
+
+      <!-- ---------- Page 2: gift hub + mini-games ---------- -->
+      <article class="view" id="viewPage2" aria-hidden="true" inert>
+        <div class="p2-wrap">
+
+          <!-- hub of little gifts -->
+          <section class="p2-pane active" id="giftHub" aria-hidden="false">
+            <header class="hub-head">
+              <h2 class="hub-title" data-i18n="hubTitle">Little Gifts &amp; Games &#10024;</h2>
+              <p class="hub-sub" data-i18n="hubSub">Go on have funn</p>
+            </header>
+            <div class="hub-grid">
+              <button class="game-card" id="cardFlower" type="button" data-game="flower">
+                <span class="gc-ico" aria-hidden="true">&#127799;</span>
+                <span class="gc-name" data-i18n="giftFlower">Flower Painting</span>
+                <span class="gc-line" data-i18n="giftFlowerDesc">Paint glowing blooms</span>
+              </button>
+              <button class="game-card" id="cardLetters" type="button" data-game="letters">
+                <span class="gc-ico" aria-hidden="true">&#128140;</span>
+                <span class="gc-name" data-i18n="giftLetters">Special Letters</span>
+                <span class="gc-line" data-i18n="giftLettersDesc">Notes from Fai &amp; Moaid</span>
+              </button>
+              <button class="game-card" id="cardRose" type="button" data-game="rose">
+                <span class="gc-ico" aria-hidden="true">&#127801;</span>
+                <span class="gc-name" data-i18n="giftRose">The Enchanted Rose</span>
+                <span class="gc-line" data-i18n="giftRoseDesc">Lift the glass dome</span>
+              </button>
+              <button class="game-card" id="cardSky" type="button" data-game="sky">
+                <span class="gc-ico" aria-hidden="true">&#127756;</span>
+                <span class="gc-name" data-i18n="giftSky">Constellation of Wishes</span>
+                <span class="gc-line" data-i18n="giftSkyDesc">Connect the stars</span>
+              </button>
+            </div>
+          </section>
+
+          <!-- Game #1: Flower Drawing Canvas (full screen) -->
+          <section class="p2-pane" id="gameFlower" aria-hidden="true" inert>
+            <h2 class="gp-title" data-i18n="giftFlower">Flower Painting</h2>
+            <canvas class="draw-canvas" id="flowerCanvas" role="img"
+                    aria-label="Glowing flower drawing canvas" data-i18n-aria="flowerAria"></canvas>
+            <p class="style-name" id="flowerStyleName" role="status" aria-live="polite"></p>
+            <div class="gp-controls">
+              <button class="gp-btn" id="flowerBack" type="button">
+                <span class="back-ic" aria-hidden="true">&#8592;</span>
+                <span data-i18n="giftsBack">Gifts</span>
+              </button>
+              <button class="gp-btn" id="flowerClear" type="button" data-i18n="clear">&#129521; Clear</button>
+              <button class="gp-btn" id="flowerStyle" type="button" data-i18n="changeFlower">&#127800; Change Flower</button>
+              <button class="gp-btn primary" id="flowerSave" type="button" data-i18n="save">&#128190; Save Artwork</button>
+            </div>
+          </section>
+
+          <!-- Gift #2: Special Letters -->
+          <section class="p2-pane gl-pane" id="giftLetters" aria-hidden="true" inert>
+            <header class="hub-head">
+              <h2 class="hub-title" data-i18n="lettersTitle">Special Letters &#10024;</h2>
+              <p class="hub-sub" data-i18n="lettersSub">Two little notes, sealed just for you</p>
+            </header>
+
+            <div class="gl-tabs" role="tablist" aria-label="Choose a letter">
+              <button class="gl-tab active" id="tabFai" type="button" role="tab" aria-selected="true"
+                      aria-controls="letterFai" data-i18n="faiTab">Fai (&#1601;&#1575;&#1610;)</button>
+              <button class="gl-tab" id="tabMoaid" type="button" role="tab" aria-selected="false"
+                      aria-controls="letterMoaid" data-i18n="moaidTab">Moaid (&#1605;&#1572;&#1610;&#1583;)</button>
+            </div>
+
+            <div class="gl-cards">
+              <article class="gl-letter active" id="letterFai" role="tabpanel" aria-labelledby="tabFai">
+                <!-- ============================================================
+                     EDIT ME ↓  —  Fai's letter (write your own words here)
+                     ============================================================ -->
+                <p class="gl-text">
+                  احبك كثير والله يخليك لي دنيا واخره وندخل الجنه❤️
+                </p>
+                <!-- ============================================================
+                     EDIT ME ↑
+                     ============================================================ -->
+                <footer class="gl-sig sig-fai">— &#1601;&#1575;&#1610; (Fai) &#128154;</footer>
+              </article>
+
+              <article class="gl-letter" id="letterMoaid" role="tabpanel" aria-labelledby="tabMoaid">
+                <!-- ============================================================
+                     EDIT ME ↓  —  Moaid's letter (write your own words here)
+                     ============================================================ -->
+                <p class="gl-text">
+                  اتمنى عجبتك يا ري, اسف بس ما اعرف اعبر فاا بس بقول انجويي 3>
+                </p>
+                <!-- ============================================================
+                     EDIT ME ↑
+                     ============================================================ -->
+                <footer class="gl-sig sig-moaid">— &#1605;&#1572;&#1610;&#1583; (Moaid) &#10024;</footer>
+              </article>
+            </div>
+
+            <div class="gl-controls">
+              <button class="gp-btn" id="lettersBack" type="button">
+                <span class="back-ic" aria-hidden="true">&#8592;</span>
+                <span data-i18n="lettersBack">Back to Gift Menu</span>
+              </button>
+            </div>
+          </section>
+
+          <!-- Gift #3: The Enchanted Rose in a Glass Dome -->
+          <section class="p2-pane gr-pane" id="giftRose" aria-hidden="true" inert>
+            <header class="hub-head">
+              <h2 class="hub-title" data-i18n="roseTitle"> Rose &#10024;</h2>
+              <p class="hub-sub" data-i18n="roseSub">🌹</p>
+            </header>
+
+            <div class="gr-stage">
+              <button class="gr-dome" id="roseDome" type="button"
+                      aria-expanded="false" aria-controls="roseMsg"
+                      aria-label="Lift the glass dome" data-i18n-aria="roseOpenAria">
+                <span class="gr-ring" aria-hidden="true"></span>
+                <span class="gr-rose" aria-hidden="true">
+                  <svg viewBox="0 0 120 160" role="img" focusable="false">
+                    <defs>
+                      <radialGradient id="rgCore" cx="50%" cy="40%" r="65%">
+                        <stop offset="0%" stop-color="#fff4f8"/>
+                        <stop offset="42%" stop-color="#ff9fbe"/>
+                        <stop offset="100%" stop-color="#c93b6b"/>
+                      </radialGradient>
+                      <radialGradient id="rgPetal" cx="50%" cy="35%" r="78%">
+                        <stop offset="0%" stop-color="#ffd0df"/>
+                        <stop offset="62%" stop-color="#ff7fa8"/>
+                        <stop offset="100%" stop-color="#b93060"/>
+                      </radialGradient>
+                      <linearGradient id="rgStem" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#8fd39a"/>
+                        <stop offset="100%" stop-color="#3c7a55"/>
+                      </linearGradient>
+                      <linearGradient id="rgLeaf" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#9fe0a6"/>
+                        <stop offset="100%" stop-color="#418a5c"/>
+                      </linearGradient>
+                    </defs>
+                    <path d="M60 72 C57 100 63 124 60 150" fill="none"
+                          stroke="url(#rgStem)" stroke-width="6" stroke-linecap="round"/>
+                    <path d="M60 108 C40 100 30 110 26 124 C44 128 56 120 60 112 Z" fill="url(#rgLeaf)"/>
+                    <path d="M60 96 C80 88 92 96 96 110 C78 114 66 106 60 100 Z" fill="url(#rgLeaf)"/>
+                    <g fill="url(#rgPetal)" opacity="0.95">
+                      <ellipse cx="60" cy="28" rx="22" ry="16"/>
+                      <ellipse cx="60" cy="28" rx="22" ry="16" transform="rotate(60 60 46)"/>
+                      <ellipse cx="60" cy="28" rx="22" ry="16" transform="rotate(120 60 46)"/>
+                      <ellipse cx="60" cy="28" rx="22" ry="16" transform="rotate(180 60 46)"/>
+                      <ellipse cx="60" cy="28" rx="22" ry="16" transform="rotate(240 60 46)"/>
+                      <ellipse cx="60" cy="28" rx="22" ry="16" transform="rotate(300 60 46)"/>
+                    </g>
+                    <g fill="url(#rgCore)">
+                      <ellipse cx="60" cy="37" rx="14" ry="10"/>
+                      <ellipse cx="60" cy="37" rx="14" ry="10" transform="rotate(72 60 46)"/>
+                      <ellipse cx="60" cy="37" rx="14" ry="10" transform="rotate(144 60 46)"/>
+                      <ellipse cx="60" cy="37" rx="14" ry="10" transform="rotate(216 60 46)"/>
+                      <ellipse cx="60" cy="37" rx="14" ry="10" transform="rotate(288 60 46)"/>
+                    </g>
+                    <circle cx="60" cy="46" r="9" fill="#ff5f92"/>
+                    <circle cx="60" cy="46" r="5.5" fill="#fff0f5" opacity="0.85"/>
+                  </svg>
+                </span>
+                <span class="gr-glass" aria-hidden="true"></span>
+                <span class="gr-base" aria-hidden="true"></span>
+                <span class="gr-hint" data-i18n="roseHint">Tap to lift</span>
+              </button>
+
+              <article class="gr-msg" id="roseMsg" aria-hidden="true" inert>
+                <!-- ============================================================
+                     EDIT ME  ↓  —  your dedication message
+                     ============================================================ -->
+                <p class="gr-text" data-i18n="roseMessage">I hope you accept this rose &#127799;</p>
+                <!-- ============================================================
+                     EDIT ME  ↑
+                     ============================================================ -->
+                <div class="gr-stickers" aria-hidden="true">
+                  <img class="gr-sticker" src="May%20Red%20Rose%20Sticker.gif" alt="" />
+                  <img class="gr-sticker tilt" src="Bachelor%20In%20Paradise%20Love%20Sticker%20by%20The%20Bachelorette.gif" alt="" />
+                </div>
+                <footer class="gr-sig">&mdash; 💖</footer>
+              </article>
+            </div>
+
+            <div class="gl-controls">
+              <button class="gp-btn" id="roseBack" type="button">
+                <span class="back-ic" aria-hidden="true">&#8592;</span>
+                <span data-i18n="roseBack">Back to Gifts</span>
+              </button>
+            </div>
+          </section>
+
+          <!-- Gift #4: Constellation of Wishes (interactive night sky) -->
+          <section class="p2-pane sky-pane" id="giftSky" aria-hidden="true" inert>
+            <canvas class="sky-canvas" id="skyCanvas" role="img"
+                    aria-label="Interactive night sky — connect the stars to form a constellation"
+                    data-i18n-aria="skyAria"></canvas>
+
+            <h2 class="gp-title sky-title" id="skyTitle" data-i18n="skyTitle">Constellation of Wishes &#10024;</h2>
+            <p class="style-name sky-hint" id="skyHint" data-i18n="skyHint">Drag from star to star</p>
+
+            <span class="sr-only" id="skyStatus" role="status" aria-live="polite"></span>
+
+            <div class="gp-controls sky-controls">
+              <button class="gp-btn" id="skyAuto" type="button" data-i18n="skyAuto">&#10022; Auto Draw Heart</button>
+              <button class="gp-btn" id="skyReset" type="button" data-i18n="skyReset">&#8635; Reset Constellation</button>
+              <button class="gp-btn primary" id="skyBack" type="button">
+                <span class="back-ic" aria-hidden="true">&#8592;</span>
+                <span data-i18n="skyBack">Back to Gift Menu</span>
+              </button>
+            </div>
+          </section>
+
+        </div>
+      </article>
+
+    </main>
+
+    <!-- the hidden Magic Star — invisible until the light finds it -->
+    <button class="magic-star" id="star" type="button" aria-label="Find the glowing star" data-i18n-aria="star">
+      <span class="star-glow" aria-hidden="true"></span>
+      <span class="star-inner" aria-hidden="true">
+        <svg viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
+          <path d="M12 2 L14.2 9.8 22 12 14.2 14.2 12 22 9.8 14.2 2 12 9.8 9.8 Z"/>
+        </svg>
+      </span>
+    </button>
+
+  </div>
+
+  <!-- ===================== DARKNESS (the flashlight mask) ===================== -->
+  <div class="darkness" id="darkness" aria-hidden="true"></div>
+
+  <!-- ===================== HUD (appears once the light is on) ===================== -->
+  <header class="hud" id="hud">
+    <div class="hud-left">
+      <button class="back-btn" id="backBtn" type="button" aria-label="Go back" data-i18n-aria="backAria">
+        <span class="back-ic" aria-hidden="true">&#8592;</span>
+        <span class="back-tx" data-i18n="back">Back</span>
+      </button>
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">&#10022;</span>
+        <span class="brand-name" data-i18n="brand">Whisper of Light</span>
+      </div>
+    </div>
+    <div class="hud-controls">
+      <button class="lang-btn" id="langBtn" type="button" aria-label="Switch to Arabic">ع</button>
+      <button class="sound-btn" id="soundBtn" type="button" aria-pressed="true">&#128266;</button>
+    </div>
+  </header>
+
+  <!-- ===================== FLOATING MUSIC PLAYER ===================== -->
+  <div class="music-widget" id="musicWidget" role="group" aria-label="Music player" data-i18n-aria="musicAria">
+    <button class="mw-btn" id="mwPrev" type="button" aria-label="Previous track" data-i18n-aria="musicPrev">&#9198;</button>
+    <button class="mw-btn mw-play" id="mwPlay" type="button" aria-label="Play music" data-i18n-aria="musicPlay">&#9654;</button>
+    <button class="mw-btn" id="mwNext" type="button" aria-label="Next track" data-i18n-aria="musicNext">&#9197;</button>
+    <span class="mw-meta">
+      <span class="mw-title" id="mwTitle">Ethereal</span>
+      <span class="mw-viz" aria-hidden="true"><i></i><i></i><i></i></span>
+    </span>
+  </div>
+
+  <!-- ===================== FX ===================== -->
+  <canvas class="fx" id="fx" aria-hidden="true"></canvas>
+  <div class="flash" id="flash" aria-hidden="true"></div>
+
+  <noscript>
+    <p style="position:fixed;inset:0;display:grid;place-items:center;color:#fff;background:#000;text-align:center;padding:24px;font-family:system-ui,sans-serif;">
+      This gift needs JavaScript enabled to play. &#128155;
+    </p>
+  </noscript>
+
+  <script src="app.js"></script>
+</body>
+</html>
